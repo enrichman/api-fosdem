@@ -10,11 +10,11 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func MakeIndexerHandler() http.Handler {
+func MakeIndexerHandler(i Indexer) http.Handler {
 	r := mux.NewRouter()
 
 	reindexHandler := kithttp.NewServer(
-		makeReindexEndpoint(),
+		makeReindexEndpoint(i),
 		decodeReindex,
 		encodeReindex,
 	)

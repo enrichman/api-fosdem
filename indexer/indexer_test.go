@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/enrichman/fosdem-speakers-scraper/indexer"
+	"github.com/enrichman/api-fosdem/indexer"
 )
 
 func TestParseScheduleXML(t *testing.T) {
@@ -27,13 +27,13 @@ func TestParseSpeakersPage(t *testing.T) {
 }
 
 func TestFillSpeakersInfo(t *testing.T) {
-	speakersFile, err := os.Open("schedule.xml")
+	speakersFile, err := os.Open("../schedule.xml")
 	if err != nil {
 		panic(err)
 	}
 	speakers := indexer.ParseScheduleXML(speakersFile)
 
-	speakersPage, err := os.Open("fosdem-speakers.htm")
+	speakersPage, err := os.Open("../fosdem-speakers.htm")
 	if err != nil {
 		panic(err)
 	}

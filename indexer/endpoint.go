@@ -2,7 +2,6 @@ package indexer
 
 import (
 	"context"
-	"errors"
 
 	"github.com/go-kit/kit/endpoint"
 )
@@ -15,8 +14,12 @@ type reindexResponse struct {
 	Err error `json:"error"`
 }
 
-func makeReindexEndpoint() endpoint.Endpoint {
+type Indexer interface {
+	Index() error
+}
+
+func makeReindexEndpoint(indexer Indexer) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
-		return reindexResponse{Err: errors.New("ciao")}, nil
+		return reindexResponse{indexer.Index()}, nil
 	}
 }

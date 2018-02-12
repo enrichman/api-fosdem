@@ -12,7 +12,7 @@ func main() {
 	port := os.Getenv("PORT")
 
 	mux := http.NewServeMux()
-	mux.Handle("/api/v1/reindex", indexer.MakeIndexerHandler())
+	mux.Handle("/api/v1/reindex", indexer.MakeIndexerHandler(&indexer.RemoteIndexer{}))
 	http.Handle("/", mux)
 
 	fmt.Println("listening...", port)
