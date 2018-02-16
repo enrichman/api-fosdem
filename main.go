@@ -13,8 +13,10 @@ import (
 func main() {
 	port := os.Getenv("PORT")
 	token := os.Getenv("TOKEN")
+	mongoURI := os.Getenv("MONGO_URI")
+	mongoDB := os.Getenv("MONGO_DB")
 
-	mongoStore, err := store.NewMongoStore("", "")
+	mongoStore, err := store.NewMongoStore(mongoURI, mongoDB)
 	if err != nil {
 		panic(err)
 	}
