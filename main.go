@@ -6,20 +6,26 @@ import (
 	"os"
 
 	"github.com/enrichman/api-fosdem/indexer"
+	"github.com/enrichman/api-fosdem/speakers"
 	"github.com/enrichman/api-fosdem/store"
 )
 
 func main() {
 	port := os.Getenv("PORT")
+	token := os.Getenv("TOKEN")
 
 	mongoStore, err := store.NewMongoStore("", "")
 	if err != nil {
 		panic(err)
 	}
-	remoteIndexer := indexer.NewRemoteIndexer(mongoStore)
+	remoteIndexer := &indexer.RemoteIndexer{
+		Token: token, SpeakerSaver: mongoStore,
+	}
+	remoteFinder := &speakers.RemoteGetter{SpeakerFinder: mongoStore}
 
 	mux := http.NewServeMux()
 	mux.Handle("/api/v1/reindex", indexer.MakeIndexerHandler(remoteIndexer))
+	mux.Handle("/api/v1/", speakers.MakeSpeakersHandler(remoteFinder))
 	http.Handle("/", mux)
 
 	fmt.Println("listening...", port)

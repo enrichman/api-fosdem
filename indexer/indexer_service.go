@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strings"
+	"time"
 )
 
 const (
@@ -15,21 +17,36 @@ type SpeakerSaver interface {
 }
 
 type RemoteIndexer struct {
-	speakerSaver SpeakerSaver
+	Token        string
+	SpeakerSaver SpeakerSaver
 }
 
-func NewRemoteIndexer(speakerSaver SpeakerSaver) *RemoteIndexer {
-	return &RemoteIndexer{speakerSaver}
+func (fi *RemoteIndexer) GetToken() string {
+	return fi.Token
 }
 
 func (fi *RemoteIndexer) Index() error {
-	scheduleRes, err := http.Get(baseUrl + "/2018/schedule/xml")
+	years := []string{"2013", "2014", "2015", "2016", "2017", "2018"}
+	for _, y := range years {
+		err := fi.IndexYear(y)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (fi *RemoteIndexer) IndexYear(year string) error {
+	fmt.Println("start indexing of year " + year)
+	start := time.Now()
+
+	scheduleRes, err := http.Get(baseUrl + "/" + year + "/schedule/xml")
 	if err != nil {
 		return err
 	}
 	speakers := ParseScheduleXML(scheduleRes.Body)
 
-	speakersRes, err := http.Get(baseUrl + "/2018/schedule/speakers/")
+	speakersRes, err := http.Get(baseUrl + "/" + year + "/schedule/speakers/")
 	if err != nil {
 		return err
 	}
@@ -41,14 +58,34 @@ func (fi *RemoteIndexer) Index() error {
 		if err == nil {
 			err := ParseSpeakerPage(&s, resp.Body)
 			if err == nil {
-				err := fi.speakerSaver.Save(s)
-				if err == nil {
-					fmt.Println("upserted", s.Name)
+				s.Slug = getSlugByLink(s.ProfilePage)
+				err := fi.SpeakerSaver.Save(s)
+				if err != nil {
+					fmt.Println("error upserting:", s.Name)
 				}
 			}
 		}
 	}
+	fmt.Printf("end indexing of year %s in %+v. Indexed %d speakers.\n", year, time.Since(start), len(speakers))
+
 	return nil
+}
+
+func getSlugByLink(detailLink string) string {
+	if detailLink == "" {
+		return ""
+	}
+	arr := strings.Split(detailLink, "/")
+	cleanedArr := make([]string, 0)
+	for _, s := range arr {
+		if len(s) > 0 {
+			cleanedArr = append(cleanedArr, s)
+		}
+	}
+	if len(cleanedArr) == 0 {
+		return ""
+	}
+	return cleanedArr[len(cleanedArr)-1]
 }
 
 type LocalIndexer struct{}

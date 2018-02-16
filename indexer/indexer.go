@@ -34,6 +34,7 @@ type Event struct {
 
 type Speaker struct {
 	ID           int    `json:"id" xml:"id,attr" bson:"_id"`
+	Slug         string `json:"slug"`
 	Name         string `json:"name" xml:",chardata"`
 	ProfileImage string `json:"profile_image" xml:"-"`
 	ProfilePage  string `json:"profile_page" xml:"-"`
