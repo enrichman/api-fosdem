@@ -13,6 +13,6 @@ func TestGetByID(t *testing.T) {
 		panic(err)
 	}
 
-	speaker, err := s.GetByID(6)
+	speaker, err := s.FindByID(6)
 	fmt.Println(speaker, err)
 }
