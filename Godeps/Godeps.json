@@ -5,5 +5,87 @@
 	"Packages": [
 		"./..."
 	],
-	"Deps": []
+	"Deps": [
+		{
+			"ImportPath": "github.com/davecgh/go-spew/spew",
+			"Comment": "v1.1.0",
+			"Rev": "346938d642f2ec3594ed81d874461961cd0faa76"
+		},
+		{
+			"ImportPath": "github.com/go-kit/kit/endpoint",
+			"Comment": "v0.6.0-9-g953e747",
+			"Rev": "953e747656a7bbb5e1f998608b460458958b70cc"
+		},
+		{
+			"ImportPath": "github.com/go-kit/kit/log",
+			"Comment": "v0.6.0-9-g953e747",
+			"Rev": "953e747656a7bbb5e1f998608b460458958b70cc"
+		},
+		{
+			"ImportPath": "github.com/go-kit/kit/transport/http",
+			"Comment": "v0.6.0-9-g953e747",
+			"Rev": "953e747656a7bbb5e1f998608b460458958b70cc"
+		},
+		{
+			"ImportPath": "github.com/go-logfmt/logfmt",
+			"Comment": "v0.3.0",
+			"Rev": "390ab7935ee28ec6b286364bba9b4dd6410cb3d5"
+		},
+		{
+			"ImportPath": "github.com/go-stack/stack",
+			"Comment": "v1.5.2",
+			"Rev": "100eb0c0a9c5b306ca2fb4f165df21d80ada4b82"
+		},
+		{
+			"ImportPath": "github.com/gorilla/mux",
+			"Comment": "v1.3.0",
+			"Rev": "392c28fe23e1c45ddba891b0320b3b5df220beea"
+		},
+		{
+			"ImportPath": "github.com/kr/logfmt",
+			"Rev": "b84e30acd515aadc4b783ad4ff83aff3299bdfe0"
+		},
+		{
+			"ImportPath": "github.com/pmezard/go-difflib/difflib",
+			"Comment": "v1.0.0",
+			"Rev": "792786c7400a136282c1664665ae0a8db921c6c2"
+		},
+		{
+			"ImportPath": "github.com/stretchr/testify/assert",
+			"Comment": "v1.1.4-27-g4d4bfba",
+			"Rev": "4d4bfba8f1d1027c4fdbe371823030df51419987"
+		},
+		{
+			"ImportPath": "github.com/yhat/scrape",
+			"Rev": "24b7890b0945459dbf91743e4d2ac5d75a51fee2"
+		},
+		{
+			"ImportPath": "golang.org/x/net/html",
+			"Rev": "ddf80d0970594e2e4cccf5a98861cad3d9eaa4cd"
+		},
+		{
+			"ImportPath": "golang.org/x/net/html/atom",
+			"Rev": "ddf80d0970594e2e4cccf5a98861cad3d9eaa4cd"
+		},
+		{
+			"ImportPath": "gopkg.in/mgo.v2",
+			"Comment": "r2015.12.06",
+			"Rev": "e30de8ac9ae3b30df7065f766c71f88bba7d4e49"
+		},
+		{
+			"ImportPath": "gopkg.in/mgo.v2/bson",
+			"Comment": "r2015.12.06",
+			"Rev": "e30de8ac9ae3b30df7065f766c71f88bba7d4e49"
+		},
+		{
+			"ImportPath": "gopkg.in/mgo.v2/internal/sasl",
+			"Comment": "r2015.12.06",
+			"Rev": "e30de8ac9ae3b30df7065f766c71f88bba7d4e49"
+		},
+		{
+			"ImportPath": "gopkg.in/mgo.v2/internal/scram",
+			"Comment": "r2015.12.06",
+			"Rev": "e30de8ac9ae3b30df7065f766c71f88bba7d4e49"
+		}
+	]
 }
