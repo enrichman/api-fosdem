@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -13,7 +14,7 @@ const (
 )
 
 type SpeakerSaver interface {
-	Save(Speaker) error
+	Save(s Speaker, year int) error
 }
 
 type RemoteIndexer struct {
@@ -59,7 +60,8 @@ func (fi *RemoteIndexer) IndexYear(year string) error {
 			err := ParseSpeakerPage(&s, resp.Body)
 			if err == nil {
 				s.Slug = getSlugByLink(s.ProfilePage)
-				err := fi.SpeakerSaver.Save(s)
+				y, _ := strconv.Atoi(year)
+				err := fi.SpeakerSaver.Save(s, y)
 				if err != nil {
 					fmt.Println("error upserting:", s.Name)
 				}

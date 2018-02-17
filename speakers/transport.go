@@ -6,6 +6,7 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"strings"
 
 	kithttp "github.com/go-kit/kit/transport/http"
 	"github.com/gorilla/mux"
@@ -55,12 +56,25 @@ func decodeSpeakerFinder(_ context.Context, r *http.Request) (interface{}, error
 			return nil, err
 		}
 	}
+
 	if offset := r.FormValue("offset"); offset != "" {
 		req.offset, err = strconv.Atoi(offset)
 		if err != nil {
 			return nil, err
 		}
 	}
+
+	req.years = make([]int, 0)
+	if year := r.FormValue("year"); year != "" {
+		for _, y := range strings.Split(year, ",") {
+			yearInt, err := strconv.Atoi(y)
+			if err != nil {
+				return nil, err
+			}
+			req.years = append(req.years, yearInt)
+		}
+	}
+
 	req.slug = r.FormValue("slug")
 
 	if req.limit == 0 || req.limit > 100 {

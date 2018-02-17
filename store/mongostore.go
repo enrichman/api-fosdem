@@ -29,9 +29,22 @@ func NewMongoStore(uri, db string) (*MongoStore, error) {
 	return &MongoStore{session.DB(db)}, nil
 }
 
-func (ms *MongoStore) Save(s indexer.Speaker) error {
+func (ms *MongoStore) Save(s indexer.Speaker, year int) error {
 	c := ms.db.C(speakerCollection)
-	_, err := c.Upsert(bson.M{"_id": s.ID}, s)
+	_, err := c.Upsert(
+		bson.M{"_id": s.ID},
+		bson.M{
+			"$set": bson.M{
+				"slug":         s.Slug,
+				"name":         s.Name,
+				"profileimage": s.ProfileImage,
+				"profilepage":  s.ProfilePage,
+				"links":        s.Links,
+				"bio":          s.Bio,
+			},
+			"$addToSet": bson.M{"years": year},
+		},
+	)
 	return err
 }
 
@@ -46,13 +59,17 @@ func (ms *MongoStore) FindByID(ID int) (*indexer.Speaker, error) {
 	return nil, errors.New("not found")
 }
 
-func (ms *MongoStore) Find(limit, offset int, slug string) ([]indexer.Speaker, int, error) {
+func (ms *MongoStore) Find(limit, offset int, slug string, years []int) ([]indexer.Speaker, int, error) {
 	c := ms.db.C(speakerCollection)
 
 	ors := make([]bson.M, 0)
 	for _, n := range strings.Split(slug, " ") {
 		ors = append(ors, bson.M{"slug": bson.RegEx{Pattern: n, Options: "i"}})
 	}
+	if len(years) > 0 {
+		ors = append(ors, bson.M{"years": bson.M{"$in": years}})
+	}
+
 	query := c.Find(bson.M{"$and": ors})
 
 	count, err := query.Count()

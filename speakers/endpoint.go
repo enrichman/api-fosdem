@@ -9,7 +9,7 @@ import (
 
 type SpeakerFinder interface {
 	FindByID(int) (*indexer.Speaker, error)
-	Find(limit, offset int, name string) ([]indexer.Speaker, int, error)
+	Find(limit, offset int, name string, years []int) ([]indexer.Speaker, int, error)
 }
 
 func makeSpeakerGetterEndpoint(finder SpeakerFinder) endpoint.Endpoint {
@@ -22,6 +22,7 @@ type findRequest struct {
 	limit  int
 	offset int
 	slug   string
+	years  []int
 }
 
 type findResponse struct {
@@ -32,7 +33,7 @@ type findResponse struct {
 func makeSpeakerFinderEndpoint(finder SpeakerFinder) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 		req := request.(findRequest)
-		speakers, count, err := finder.Find(req.limit, req.offset, req.slug)
+		speakers, count, err := finder.Find(req.limit, req.offset, req.slug, req.years)
 		if err != nil {
 			return nil, err
 		}

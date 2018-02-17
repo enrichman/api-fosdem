@@ -40,6 +40,7 @@ type Speaker struct {
 	ProfilePage  string `json:"profile_page" xml:"-"`
 	Bio          string `json:"bio,omitempty" xml:"-"`
 	Links        []Link `json:"links,omitempty" xml:"-"`
+	Years        []int  `json:"years,omitempty"`
 }
 
 type Link struct {
