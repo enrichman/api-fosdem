@@ -46,21 +46,26 @@ func (ms *MongoStore) FindByID(ID int) (*indexer.Speaker, error) {
 	return nil, errors.New("not found")
 }
 
-func (ms *MongoStore) Find(name string) []indexer.Speaker {
+func (ms *MongoStore) Find(limit, offset int, slug string) ([]indexer.Speaker, int, error) {
 	c := ms.db.C(speakerCollection)
 
 	ors := make([]bson.M, 0)
-	for _, n := range strings.Split(name, " ") {
+	for _, n := range strings.Split(slug, " ") {
 		ors = append(ors, bson.M{"slug": bson.RegEx{Pattern: n, Options: "i"}})
 	}
-	query := bson.M{"$and": ors}
-	iter := c.Find(query).Iter()
+	query := c.Find(bson.M{"$and": ors})
 
+	count, err := query.Count()
+	if err != nil {
+		return nil, 0, err
+	}
+
+	iter := query.Skip(offset).Limit(limit).Sort("_id").Iter()
 	speakersFound := make([]indexer.Speaker, 0)
-
 	var s indexer.Speaker
 	for iter.Next(&s) {
 		speakersFound = append(speakersFound, s)
 	}
-	return speakersFound
+
+	return speakersFound, count, nil
 }

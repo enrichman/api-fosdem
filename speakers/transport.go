@@ -12,7 +12,7 @@ import (
 )
 
 func MakeSpeakersHandler(s SpeakerFinder) http.Handler {
-	r := mux.NewRouter()
+	r := mux.NewRouter().StrictSlash(true)
 
 	speakerGetterHandler := kithttp.NewServer(
 		makeSpeakerGetterEndpoint(s),
@@ -45,8 +45,28 @@ func encodeSpeakerGetter(_ context.Context, w http.ResponseWriter, res interface
 	return json.NewEncoder(w).Encode(res)
 }
 
-func decodeSpeakerFinder(_ context.Context, r *http.Request) (request interface{}, err error) {
-	return r.FormValue("name"), nil
+func decodeSpeakerFinder(_ context.Context, r *http.Request) (interface{}, error) {
+	var err error
+	var req findRequest
+
+	if limit := r.FormValue("limit"); limit != "" {
+		req.limit, err = strconv.Atoi(limit)
+		if err != nil {
+			return nil, err
+		}
+	}
+	if offset := r.FormValue("offset"); offset != "" {
+		req.offset, err = strconv.Atoi(offset)
+		if err != nil {
+			return nil, err
+		}
+	}
+	req.slug = r.FormValue("slug")
+
+	if req.limit == 0 || req.limit > 100 {
+		req.limit = 100
+	}
+	return req, nil
 }
 
 func encodeSpeakerFinder(_ context.Context, w http.ResponseWriter, res interface{}) error {

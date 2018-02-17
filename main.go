@@ -21,13 +21,13 @@ func main() {
 		panic(err)
 	}
 	remoteIndexer := &indexer.RemoteIndexer{
-		Token: token, SpeakerSaver: mongoStore,
+		Token:        token,
+		SpeakerSaver: mongoStore,
 	}
-	remoteFinder := &speakers.RemoteGetter{SpeakerFinder: mongoStore}
 
 	mux := http.NewServeMux()
 	mux.Handle("/api/v1/reindex", indexer.MakeIndexerHandler(remoteIndexer))
-	mux.Handle("/api/v1/", speakers.MakeSpeakersHandler(remoteFinder))
+	mux.Handle("/api/v1/", speakers.MakeSpeakersHandler(mongoStore))
 	http.Handle("/", mux)
 
 	fmt.Println("listening...", port)

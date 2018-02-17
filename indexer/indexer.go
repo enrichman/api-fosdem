@@ -36,10 +36,10 @@ type Speaker struct {
 	ID           int    `json:"id" xml:"id,attr" bson:"_id"`
 	Slug         string `json:"slug"`
 	Name         string `json:"name" xml:",chardata"`
-	ProfileImage string `json:"profile_image" xml:"-"`
+	ProfileImage string `json:"profile_image,omitempty" xml:"-"`
 	ProfilePage  string `json:"profile_page" xml:"-"`
-	Bio          string `json:"bio" xml:"-"`
-	Links        []Link `json:"links" xml:"-"`
+	Bio          string `json:"bio,omitempty" xml:"-"`
+	Links        []Link `json:"links,omitempty" xml:"-"`
 }
 
 type Link struct {
