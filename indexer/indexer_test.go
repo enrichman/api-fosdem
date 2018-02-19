@@ -12,7 +12,7 @@ func TestParseScheduleXML(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	_ = indexer.ParseScheduleXML(speakersFile)
+	_, _ = indexer.ParseScheduleXML(speakersFile)
 }
 
 func TestParseSpeakersPage(t *testing.T) {
@@ -28,7 +28,7 @@ func TestFillSpeakersInfo(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	speakers := indexer.ParseScheduleXML(speakersFile)
+	speakers, _ := indexer.ParseScheduleXML(speakersFile)
 
 	speakersPage, err := os.Open("../fosdem-speakers.htm")
 	if err != nil {
