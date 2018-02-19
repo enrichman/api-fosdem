@@ -55,22 +55,23 @@ type Link struct {
 }
 
 // ParseScheduleXML parse the XML returning the list of speakers
-func ParseScheduleXML(xmlReader io.Reader) []Speaker {
+func ParseScheduleXML(xmlReader io.Reader) ([]Speaker, error) {
 	var schedule Schedule
-	xml.NewDecoder(xmlReader).Decode(&schedule)
+	err := xml.NewDecoder(xmlReader).Decode(&schedule)
+	if err != nil {
+		return nil, err
+	}
 
 	speakers := make([]Speaker, 0)
 	for _, d := range schedule.Days {
 		for _, r := range d.Rooms {
 			for _, ev := range r.Events {
-				for _, s := range ev.Speakers {
-					speakers = append(speakers, s)
-				}
+				speakers = append(speakers, ev.Speakers...)
 			}
 		}
 	}
 
-	return speakers
+	return speakers, nil
 }
 
 //ParseSpeakersPage returns a map SpeakerName to DetailPageLink of the speakers

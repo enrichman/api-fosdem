@@ -57,7 +57,11 @@ func (fi *RemoteIndexer) IndexYear(year string) error {
 	if err != nil {
 		return err
 	}
-	speakers := ParseScheduleXML(scheduleRes.Body)
+
+	speakers, err := ParseScheduleXML(scheduleRes.Body)
+	if err != nil {
+		return err
+	}
 
 	speakersRes, err := http.Get(baseURL + "/" + year + "/schedule/speakers/")
 	if err != nil {
@@ -102,14 +106,20 @@ func getSlugByLink(detailLink string) string {
 	return cleanedArr[len(cleanedArr)-1]
 }
 
-type localIndexer struct{}
+// LocalIndexer is an indexer that fetch the FOSDEM XML locally
+type LocalIndexer struct{}
 
-func (fi *localIndexer) Index() error {
+// Index starts the indexing
+func (fi *LocalIndexer) Index() error {
 	speakersFile, err := os.Open("schedule.xml")
 	if err != nil {
 		return err
 	}
-	speakers := ParseScheduleXML(speakersFile)
+
+	speakers, err := ParseScheduleXML(speakersFile)
+	if err != nil {
+		return err
+	}
 
 	speakersPage, err := os.Open("fosdem-speakers.htm")
 	if err != nil {
