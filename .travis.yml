@@ -1,0 +1,12 @@
+language: go
+go:
+  - 1.10
+install:
+  - go get -u github.com/alecthomas/gometalinter
+  - gometalinter --install
+  - go build -v ./...
+before_script:
+  - go install ./...
+script:
+  - gometalinter --vendor --disable=gocyclo --disable=gas --dupl-threshold=70 --checkstyle --deadline=60s ./...
+  - go test -v $(go list ./... | grep -v /vendor/)
