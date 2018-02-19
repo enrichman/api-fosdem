@@ -14,10 +14,12 @@ const (
 	speakerCollection = "speakers"
 )
 
+// MongoStore can save and retrieve Speakers from MongoDB
 type MongoStore struct {
 	db *mgo.Database
 }
 
+// NewMongoStore creates a new MongoStore
 func NewMongoStore(uri, db string) (*MongoStore, error) {
 	if db == "" {
 		db = defaultDB
@@ -29,6 +31,7 @@ func NewMongoStore(uri, db string) (*MongoStore, error) {
 	return &MongoStore{session.DB(db)}, nil
 }
 
+// Save a speaker of the passed year
 func (ms *MongoStore) Save(s indexer.Speaker, year int) error {
 	c := ms.db.C(speakerCollection)
 	_, err := c.Upsert(
@@ -48,6 +51,7 @@ func (ms *MongoStore) Save(s indexer.Speaker, year int) error {
 	return err
 }
 
+// FindByID find a Speaker from its ID
 func (ms *MongoStore) FindByID(ID int) (*indexer.Speaker, error) {
 	c := ms.db.C(speakerCollection)
 	iter := c.Find(bson.M{"_id": ID}).Iter()
@@ -59,6 +63,7 @@ func (ms *MongoStore) FindByID(ID int) (*indexer.Speaker, error) {
 	return nil, errors.New("not found")
 }
 
+// Find find a list of Speakers based on the passed params
 func (ms *MongoStore) Find(limit, offset int, slug string, years []int) ([]indexer.Speaker, int, error) {
 	c := ms.db.C(speakerCollection)
 

@@ -10,7 +10,8 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func MakeIndexerHandler(i Indexer) http.Handler {
+// MakeReindexerHandler setup the handlers on the /api/v1/reindex route
+func MakeReindexerHandler(i indexer) http.Handler {
 	r := mux.NewRouter()
 
 	reindexHandler := kithttp.NewServer(

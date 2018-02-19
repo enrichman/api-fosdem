@@ -15,12 +15,12 @@ type reindexResponse struct {
 	Err error `json:"error"`
 }
 
-type Indexer interface {
+type indexer interface {
 	GetToken() string
 	Index() error
 }
 
-func makeReindexEndpoint(indexer Indexer) endpoint.Endpoint {
+func makeReindexEndpoint(indexer indexer) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 		req := request.(reindexRequest)
 		if req.token != indexer.GetToken() {
