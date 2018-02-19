@@ -10,22 +10,33 @@ import (
 )
 
 const (
-	baseUrl = "https://fosdem.org"
+	baseURL = "https://fosdem.org"
 )
 
-type SpeakerSaver interface {
+type speakerSaver interface {
 	Save(s Speaker, year int) error
 }
 
+// RemoteIndexer is an indexer that fetch the FOSDEM XML remotely
 type RemoteIndexer struct {
 	Token        string
-	SpeakerSaver SpeakerSaver
+	speakerSaver speakerSaver
 }
 
+// NewRemoteIndexer returns a remoteIndexer
+func NewRemoteIndexer(token string, speakerSaver speakerSaver) *RemoteIndexer {
+	return &RemoteIndexer{
+		Token:        token,
+		speakerSaver: speakerSaver,
+	}
+}
+
+// GetToken returns the token used to check if the request is valid
 func (fi *RemoteIndexer) GetToken() string {
 	return fi.Token
 }
 
+// Index starts the indexing
 func (fi *RemoteIndexer) Index() error {
 	years := []string{"2013", "2014", "2015", "2016", "2017", "2018"}
 	for _, y := range years {
@@ -37,17 +48,18 @@ func (fi *RemoteIndexer) Index() error {
 	return nil
 }
 
+// IndexYear index the provided year
 func (fi *RemoteIndexer) IndexYear(year string) error {
 	fmt.Println("start indexing of year " + year)
 	start := time.Now()
 
-	scheduleRes, err := http.Get(baseUrl + "/" + year + "/schedule/xml")
+	scheduleRes, err := http.Get(baseURL + "/" + year + "/schedule/xml")
 	if err != nil {
 		return err
 	}
 	speakers := ParseScheduleXML(scheduleRes.Body)
 
-	speakersRes, err := http.Get(baseUrl + "/" + year + "/schedule/speakers/")
+	speakersRes, err := http.Get(baseURL + "/" + year + "/schedule/speakers/")
 	if err != nil {
 		return err
 	}
@@ -55,13 +67,13 @@ func (fi *RemoteIndexer) IndexYear(year string) error {
 
 	speakers = FillSpeakersInfo(speakers, speakersLink)
 	for _, s := range speakers {
-		resp, err := http.Get(baseUrl + s.ProfilePage)
+		resp, err := http.Get(baseURL + s.ProfilePage)
 		if err == nil {
 			err := ParseSpeakerPage(&s, resp.Body)
 			if err == nil {
 				s.Slug = getSlugByLink(s.ProfilePage)
 				y, _ := strconv.Atoi(year)
-				err := fi.SpeakerSaver.Save(s, y)
+				err := fi.speakerSaver.Save(s, y)
 				if err != nil {
 					fmt.Println("error upserting:", s.Name)
 				}
@@ -90,9 +102,9 @@ func getSlugByLink(detailLink string) string {
 	return cleanedArr[len(cleanedArr)-1]
 }
 
-type LocalIndexer struct{}
+type localIndexer struct{}
 
-func (fi *LocalIndexer) Index() error {
+func (fi *localIndexer) Index() error {
 	speakersFile, err := os.Open("schedule.xml")
 	if err != nil {
 		return err
@@ -111,7 +123,7 @@ func (fi *LocalIndexer) Index() error {
 	for _, s := range speakers {
 		fmt.Println("Getting", s.Name)
 
-		resp, err := http.Get(baseUrl + s.ProfilePage)
+		resp, err := http.Get(baseURL + s.ProfilePage)
 		if err == nil {
 			err := ParseSpeakerPage(&s, resp.Body)
 			if err == nil {
@@ -119,6 +131,5 @@ func (fi *LocalIndexer) Index() error {
 			}
 		}
 	}
-
 	return nil
 }

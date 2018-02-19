@@ -20,10 +20,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	remoteIndexer := &indexer.RemoteIndexer{
-		Token:        token,
-		SpeakerSaver: mongoStore,
-	}
+	remoteIndexer := indexer.NewRemoteIndexer(token, mongoStore)
 
 	mux := http.NewServeMux()
 	mux.Handle("/api/v1/reindex", indexer.MakeReindexerHandler(remoteIndexer))
