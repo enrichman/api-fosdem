@@ -12,7 +12,8 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func MakeSpeakersHandler(s SpeakerFinder) http.Handler {
+// MakeSpeakersHandler setup the handlers on the /api/v1/speakers route
+func MakeSpeakersHandler(s speakerFinder) http.Handler {
 	r := mux.NewRouter().StrictSlash(true)
 
 	speakerGetterHandler := kithttp.NewServer(

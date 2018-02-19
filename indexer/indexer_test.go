@@ -1,7 +1,6 @@
 package indexer_test
 
 import (
-	"fmt"
 	"os"
 	"testing"
 
@@ -13,8 +12,7 @@ func TestParseScheduleXML(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	speakers := indexer.ParseScheduleXML(speakersFile)
-	fmt.Println(speakers)
+	_, _ = indexer.ParseScheduleXML(speakersFile)
 }
 
 func TestParseSpeakersPage(t *testing.T) {
@@ -22,8 +20,7 @@ func TestParseSpeakersPage(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	speakersLink := indexer.ParseSpeakersPage(speakersPage)
-	fmt.Println(speakersLink)
+	_ = indexer.ParseSpeakersPage(speakersPage)
 }
 
 func TestFillSpeakersInfo(t *testing.T) {
@@ -31,7 +28,7 @@ func TestFillSpeakersInfo(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	speakers := indexer.ParseScheduleXML(speakersFile)
+	speakers, _ := indexer.ParseScheduleXML(speakersFile)
 
 	speakersPage, err := os.Open("../fosdem-speakers.htm")
 	if err != nil {
@@ -39,7 +36,5 @@ func TestFillSpeakersInfo(t *testing.T) {
 	}
 	speakersLink := indexer.ParseSpeakersPage(speakersPage)
 
-	speakers = indexer.FillSpeakersInfo(speakers, speakersLink)
-
-	fmt.Println(speakers)
+	_ = indexer.FillSpeakersInfo(speakers, speakersLink)
 }
