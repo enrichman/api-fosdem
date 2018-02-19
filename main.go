@@ -26,7 +26,7 @@ func main() {
 	}
 
 	mux := http.NewServeMux()
-	mux.Handle("/api/v1/reindex", indexer.MakeIndexerHandler(remoteIndexer))
+	mux.Handle("/api/v1/reindex", indexer.MakeReindexerHandler(remoteIndexer))
 	mux.Handle("/api/v1/", speakers.MakeSpeakersHandler(mongoStore))
 	http.Handle("/", mux)
 

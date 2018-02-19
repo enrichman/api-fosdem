@@ -12,26 +12,31 @@ import (
 	"golang.org/x/net/html/atom"
 )
 
+// Schedule maps the schedule on the XML
 type Schedule struct {
 	Days []Day `xml:"day"`
 }
 
+// Day maps the day on the XML
 type Day struct {
 	Index int    `xml:"index,attr"`
 	Date  string `xml:"date,attr"`
 	Rooms []Room `xml:"room"`
 }
 
+// Room maps the room on the XML
 type Room struct {
 	Name   string  `xml:"name,attr"`
 	Events []Event `xml:"event"`
 }
 
+// Event maps the event on the XML
 type Event struct {
 	ID       int       `xml:"id,attr"`
 	Speakers []Speaker `xml:"persons>person"`
 }
 
+// Speaker maps the speaker on the XML and the other attributes
 type Speaker struct {
 	ID           int    `json:"id" xml:"id,attr" bson:"_id"`
 	Slug         string `json:"slug"`
@@ -43,11 +48,13 @@ type Speaker struct {
 	Years        []int  `json:"years,omitempty"`
 }
 
+// Link is a detail link owned by a Speaker
 type Link struct {
 	URL   string `json:"url"`
 	Title string `json:"title"`
 }
 
+// ParseScheduleXML parse the XML returning the list of speakers
 func ParseScheduleXML(xmlReader io.Reader) []Speaker {
 	var schedule Schedule
 	xml.NewDecoder(xmlReader).Decode(&schedule)
@@ -91,6 +98,7 @@ func ParseSpeakersPage(htmlPage io.Reader) map[string]string {
 	return linkMap
 }
 
+// FillSpeakersInfo fills the speakers information retrieving the info from the urls passed in the map
 func FillSpeakersInfo(speakers []Speaker, detailLinkMap map[string]string) []Speaker {
 	fullSpeakers := make([]Speaker, 0)
 
@@ -107,6 +115,7 @@ func FillSpeakersInfo(speakers []Speaker, detailLinkMap map[string]string) []Spe
 	return fullSpeakers
 }
 
+// ParseSpeakerPage parse the Speaker HTML page and fills the Speaker info
 func ParseSpeakerPage(speaker *Speaker, htmlPage io.Reader) error {
 	root, err := html.Parse(htmlPage)
 	if err != nil {
