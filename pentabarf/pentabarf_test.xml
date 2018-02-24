@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schedule>
+    <conference>
+        <title>Conf TItle</title>
+        <subtitle>Conf subtitle</subtitle>
+        <venue>Conf venue</venue>
+        <city>Confcity</city>
+        <start>2018-02-03</start>
+        <end>2018-02-04</end>
+        <days>2</days>
+        <day_change>09:31:10</day_change>
+        <timeslot_duration>00:05:00</timeslot_duration>
+    </conference>
+    <day index="1" date="2018-02-03">
+        <room name="Room 1">
+            <event id="123">
+                <start>10:00</start>
+                <duration>00:50</duration>
+                <room>Room 1</room>
+                <slug>event_123_slug</slug>
+                <title>Event 123 title</title>
+                <subtitle>A nice event</subtitle>
+                <track>Keynotes</track>
+                <type>keynote</type>
+                <language>Jabba</language>
+                <abstract>&lt;p&gt;This is the abstract of the event.&lt;/p&gt;</abstract>
+                <description>&lt;p&gt;This is the description of the event.&lt;/p&gt;</description>
+                <persons>
+                    <person id="1">Mario Rossi</person>
+                    <person id="2">Paolo Bianchi</person>
+                </persons>
+                <links>
+                    <link href="https://video.fosdem.org/123.mp4">Video recording (mp4)</link>
+                    <link href="https://submission.fosdem.org/feedback/123.php">Submit feedback</link>
+                </links>
+            </event>
+            <event id="124">
+                <start>10:00</start>
+                <duration>00:50</duration>
+                <room>Room 1</room>
+                <slug>event_124_slug</slug>
+                <title>Event 124 title</title>
+                <subtitle>A nice event</subtitle>
+                <track>Keynotes</track>
+                <type>keynote</type>
+                <language>Jabba</language>
+                <abstract>&lt;p&gt;This is the abstract of the event.&lt;/p&gt;</abstract>
+                <description>&lt;p&gt;This is the description of the event.&lt;/p&gt;</description>
+                <persons>
+                    <person id="2">Paolo Bianchi</person>
+                </persons>
+                <links>
+                    <link href="https://video.fosdem.org/123.mp4">Video recording (mp4)</link>
+                    <link href="https://submission.fosdem.org/feedback/123.php">Submit feedback</link>
+                </links>
+            </event>
+        </room>
+        <room name="Room 2">
+            <event id="234">
+                <start>10:00</start>
+                <duration>00:50</duration>
+                <room>Room 2</room>
+                <slug>event_234_slug</slug>
+                <title>Event 234 title</title>
+                <subtitle>A nice event</subtitle>
+                <track>Keynotes</track>
+                <type>keynote</type>
+                <language>Jabba</language>
+                <abstract>&lt;p&gt;This is the abstract of the event.&lt;/p&gt;</abstract>
+                <description>&lt;p&gt;This is the description of the event.&lt;/p&gt;</description>
+                <persons>
+                    <person id="1">Mario Rossi</person>
+                </persons>
+                <links>
+                    <link href="https://video.fosdem.org/123.mp4">Video recording (mp4)</link>
+                    <link href="https://submission.fosdem.org/feedback/123.php">Submit feedback</link>
+                </links>
+            </event>
+        </room>
+    </day>
+    <day index="2" date="2018-02-04">
+        <room name="Room 1">
+            <event id="123">
+                <start>10:00</start>
+                <duration>00:50</duration>
+                <room>Room 1</room>
+                <slug>event_123_slug</slug>
+                <title>Event 123 title</title>
+                <subtitle>A nice event</subtitle>
+                <track>Keynotes</track>
+                <type>keynote</type>
+                <language>Jabba</language>
+                <abstract>&lt;p&gt;This is the abstract of the event.&lt;/p&gt;</abstract>
+                <description>&lt;p&gt;This is the description of the event.&lt;/p&gt;</description>
+                <persons>
+                    <person id="1">Mario Rossi</person>
+                    <person id="2">Paolo Bianchi</person>
+                </persons>
+                <links>
+                    <link href="https://video.fosdem.org/123.mp4">Video recording (mp4)</link>
+                    <link href="https://submission.fosdem.org/feedback/123.php">Submit feedback</link>
+                </links>
+            </event>
+            <event id="124">
+                <start>10:00</start>
+                <duration>00:50</duration>
+                <room>Room 1</room>
+                <slug>event_124_slug</slug>
+                <title>Event 124 title</title>
+                <subtitle>A nice event</subtitle>
+                <track>Keynotes</track>
+                <type>keynote</type>
+                <language>Jabba</language>
+                <abstract>&lt;p&gt;This is the abstract of the event.&lt;/p&gt;</abstract>
+                <description>&lt;p&gt;This is the description of the event.&lt;/p&gt;</description>
+                <persons>
+                    <person id="2">Paolo Bianchi</person>
+                </persons>
+                <links>
+                    <link href="https://video.fosdem.org/123.mp4">Video recording (mp4)</link>
+                    <link href="https://submission.fosdem.org/feedback/123.php">Submit feedback</link>
+                </links>
+            </event>
+        </room>
+        <room name="Room 2">
+            <event id="234">
+                <start>10:00</start>
+                <duration>00:50</duration>
+                <room>Room 2</room>
+                <slug>event_234_slug</slug>
+                <title>Event 234 title</title>
+                <subtitle>A nice event</subtitle>
+                <track>Keynotes</track>
+                <type>keynote</type>
+                <language>Jabba</language>
+                <abstract>&lt;p&gt;This is the abstract of the event.&lt;/p&gt;</abstract>
+                <description>&lt;p&gt;This is the description of the event.&lt;/p&gt;</description>
+                <persons>
+                    <person id="1">Mario Rossi</person>
+                </persons>
+                <links>
+                    <link href="https://video.fosdem.org/123.mp4">Video recording (mp4)</link>
+                    <link href="https://submission.fosdem.org/feedback/123.php">Submit feedback</link>
+                </links>
+            </event>
+        </room>
+    </day>
+</schedule>
