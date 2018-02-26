@@ -15,6 +15,47 @@ func TestParse(t *testing.T) {
 	fmt.Printf("%+v %+v\n", s, err)
 }
 
+func Test_parseDay(t *testing.T) {
+	location, _ := time.LoadLocation("Europe/Brussels")
+
+	type args struct {
+		*Day
+		*time.Location
+	}
+	tt := []struct {
+		name    string
+		args    args
+		expDay  *Day
+		wantErr bool
+	}{
+		{
+			name: "happy path",
+			args: args{Day: &Day{DateStr: "1989-10-02"}, Location: location},
+			expDay: &Day{
+				Date:    time.Date(1989, time.October, 2, 0, 0, 0, 0, location),
+				DateStr: "1989-10-02",
+			},
+		},
+		{
+			name:    "wrong date",
+			args:    args{Day: &Day{DateStr: "aaa"}, Location: location},
+			wantErr: true,
+		},
+	}
+
+	for _, tc := range tt {
+		t.Run(tc.name, func(t *testing.T) {
+			day, err := parseDay(tc.args.Day, tc.args.Location)
+
+			assert.Equal(t, tc.expDay, day)
+			if tc.wantErr {
+				assert.NotNil(t, err)
+			} else {
+				assert.Nil(t, err)
+			}
+		})
+	}
+}
 func Test_parseEvent(t *testing.T) {
 	location, _ := time.LoadLocation("Europe/Brussels")
 
@@ -53,7 +94,7 @@ func Test_parseEvent(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "happy duration",
+			name: "wrong duration",
 			args: args{
 				Event:    &Event{StartStr: "15:30", DurationStr: "AAA"},
 				Time:     time.Date(1989, time.October, 2, 0, 0, 0, 0, location),
