@@ -91,9 +91,8 @@ func Parse(xmlReader io.Reader) (*Schedule, error) {
 // ParseInLocation will parse the Pentabarf XML returning the correspoding Schedule
 func ParseInLocation(xmlReader io.Reader, location *time.Location) (*Schedule, error) {
 	var schedule Schedule
-	var err error
 
-	err = xml.NewDecoder(xmlReader).Decode(&schedule)
+	err := xml.NewDecoder(xmlReader).Decode(&schedule)
 	if err != nil {
 		return nil, err
 	}
