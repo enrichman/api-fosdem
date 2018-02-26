@@ -103,12 +103,23 @@ func ParseInLocation(xmlReader io.Reader, location *time.Location) (*Schedule, e
 		return nil, err
 	}
 
-	for i, d := range schedule.Days {
-		d.Date, err = time.ParseInLocation(yyyyMMddFormat, d.DateStr, location)
+	for dIndex, d := range schedule.Days {
+		d, err = parseDay(d, location)
 		if err != nil {
 			return nil, err
 		}
-		schedule.Days[i] = d
+
+		for rIndex, r := range d.Rooms {
+			for eIndex, e := range r.Events {
+				e, err = parseEvent(e, d.Date, location)
+				if err != nil {
+					return nil, err
+				}
+				r.Events[eIndex] = e
+			}
+			d.Rooms[rIndex] = r
+		}
+		schedule.Days[dIndex] = d
 	}
 
 	return &schedule, nil
@@ -138,6 +149,15 @@ func parseConference(c *Conference, location *time.Location) (*Conference, error
 	}
 
 	return c, nil
+}
+
+func parseDay(d *Day, location *time.Location) (*Day, error) {
+	var err error
+	d.Date, err = time.ParseInLocation(yyyyMMddFormat, d.DateStr, location)
+	if err != nil {
+		return nil, err
+	}
+	return d, nil
 }
 
 func parseEvent(e *Event, day time.Time, location *time.Location) (*Event, error) {
