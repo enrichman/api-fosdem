@@ -15,6 +15,77 @@ func TestParse(t *testing.T) {
 	fmt.Printf("%+v %+v\n", s, err)
 }
 
+func Test_parseConference(t *testing.T) {
+	location, _ := time.LoadLocation("Europe/Brussels")
+
+	type args struct {
+		*Conference
+		*time.Location
+	}
+	tt := []struct {
+		name          string
+		args          args
+		expConference *Conference
+		wantErr       bool
+	}{
+		{
+			name: "happy path",
+			args: args{
+				Conference: &Conference{
+					StartDateStr:        "2018-02-03",
+					EndDateStr:          "2018-02-04",
+					DayChangeStr:        "09:00:00",
+					TimeslotDurationStr: "00:10:00",
+				},
+				Location: location,
+			},
+			expConference: &Conference{
+				StartDate:           time.Date(2018, time.February, 3, 0, 0, 0, 0, location),
+				StartDateStr:        "2018-02-03",
+				EndDate:             time.Date(2018, time.February, 4, 0, 0, 0, 0, location),
+				EndDateStr:          "2018-02-04",
+				DayChange:           time.Duration(9) * time.Hour,
+				DayChangeStr:        "09:00:00",
+				TimeslotDuration:    time.Duration(10) * time.Minute,
+				TimeslotDurationStr: "00:10:00",
+			},
+		},
+		{
+			name:    "wrong start date",
+			args:    args{Conference: &Conference{StartDateStr: "AAA"}, Location: location},
+			wantErr: true,
+		},
+		{
+			name:    "wrong end date",
+			args:    args{Conference: &Conference{EndDateStr: "AAA"}, Location: location},
+			wantErr: true,
+		},
+		{
+			name:    "wrong day change",
+			args:    args{Conference: &Conference{DayChangeStr: "AAA"}, Location: location},
+			wantErr: true,
+		},
+		{
+			name:    "wrong timeslot duration",
+			args:    args{Conference: &Conference{TimeslotDurationStr: "AAA"}, Location: location},
+			wantErr: true,
+		},
+	}
+
+	for _, tc := range tt {
+		t.Run(tc.name, func(t *testing.T) {
+			conf, err := parseConference(tc.args.Conference, tc.args.Location)
+
+			assert.Equal(t, tc.expConference, conf)
+			if tc.wantErr {
+				assert.NotNil(t, err)
+			} else {
+				assert.Nil(t, err)
+			}
+		})
+	}
+}
+
 func Test_parseDay(t *testing.T) {
 	location, _ := time.LoadLocation("Europe/Brussels")
 
