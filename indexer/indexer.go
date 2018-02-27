@@ -1,50 +1,26 @@
 package indexer
 
 import (
-	"encoding/xml"
 	"errors"
 	"fmt"
 	"io"
 	"strings"
 
+	"github.com/enrichman/api-fosdem/pentabarf"
 	"github.com/yhat/scrape"
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
 )
 
-// Schedule maps the schedule on the XML
-type Schedule struct {
-	Days []Day `xml:"day"`
-}
-
-// Day maps the day on the XML
-type Day struct {
-	Index int    `xml:"index,attr"`
-	Date  string `xml:"date,attr"`
-	Rooms []Room `xml:"room"`
-}
-
-// Room maps the room on the XML
-type Room struct {
-	Name   string  `xml:"name,attr"`
-	Events []Event `xml:"event"`
-}
-
-// Event maps the event on the XML
-type Event struct {
-	ID       int       `xml:"id,attr"`
-	Speakers []Speaker `xml:"persons>person"`
-}
-
-// Speaker maps the speaker on the XML and the other attributes
+// Speaker maps the speaker
 type Speaker struct {
-	ID           int    `json:"id" xml:"id,attr" bson:"_id"`
+	ID           int    `json:"id" bson:"_id"`
 	Slug         string `json:"slug"`
-	Name         string `json:"name" xml:",chardata"`
-	ProfileImage string `json:"profile_image,omitempty" xml:"-"`
-	ProfilePage  string `json:"profile_page" xml:"-"`
-	Bio          string `json:"bio,omitempty" xml:"-"`
-	Links        []Link `json:"links,omitempty" xml:"-"`
+	Name         string `json:"name"`
+	ProfileImage string `json:"profile_image,omitempty"`
+	ProfilePage  string `json:"profile_page"`
+	Bio          string `json:"bio,omitempty"`
+	Links        []Link `json:"links,omitempty"`
 	Years        []int  `json:"years,omitempty"`
 }
 
@@ -56,18 +32,17 @@ type Link struct {
 
 // ParseScheduleXML parse the XML returning the list of speakers
 func ParseScheduleXML(xmlReader io.Reader) ([]Speaker, error) {
-	var schedule Schedule
-	err := xml.NewDecoder(xmlReader).Decode(&schedule)
+	schedule, err := pentabarf.Parse(xmlReader)
 	if err != nil {
 		return nil, err
 	}
 
 	speakers := make([]Speaker, 0)
-	for _, d := range schedule.Days {
-		for _, r := range d.Rooms {
-			for _, ev := range r.Events {
-				speakers = append(speakers, ev.Speakers...)
-			}
+	for _, ev := range schedule.GetAllEvents() {
+		for _, p := range ev.Persons {
+			speakers = append(speakers, Speaker{
+				ID: p.ID, Name: p.Name,
+			})
 		}
 	}
 
