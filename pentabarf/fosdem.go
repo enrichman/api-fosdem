@@ -16,6 +16,24 @@ type Schedule struct {
 	Days       []*Day      `xml:"day"`
 }
 
+// GetAllEvents returns all the events of the schedule
+func (s *Schedule) GetAllEvents() []*Event {
+	events := make([]*Event, 0)
+	for _, d := range s.Days {
+		events = append(events, d.GetAllEvents()...)
+	}
+	return events
+}
+
+// GetAllRooms returns all the rooms of the schedule
+func (s *Schedule) GetAllRooms() []*Room {
+	rooms := make([]*Room, 0)
+	for _, d := range s.Days {
+		rooms = append(rooms, d.Rooms...)
+	}
+	return rooms
+}
+
 // Conference contains the main information about the conference
 type Conference struct {
 	Title               string `xml:"title"`
@@ -40,10 +58,27 @@ type Day struct {
 	Rooms   []*Room `xml:"room"`
 }
 
+func (d *Day) String() string {
+	return `Day{Day: "` + d.DateStr + `"}`
+}
+
+// GetAllEvents returns all the events of the day
+func (d *Day) GetAllEvents() []*Event {
+	events := make([]*Event, 0)
+	for _, r := range d.Rooms {
+		events = append(events, r.Events...)
+	}
+	return events
+}
+
 // Room contains all the events of the day in the room
 type Room struct {
 	Name   string   `xml:"name,attr"`
 	Events []*Event `xml:"event"`
+}
+
+func (r *Room) String() string {
+	return `Room{Name: "` + r.Name + `"}`
 }
 
 // Event contains all the details about the event
@@ -64,6 +99,10 @@ type Event struct {
 	Description string    `xml:"description"`
 	Persons     []*Person `xml:"persons>person"`
 	Links       []*Link   `xml:"links>link"`
+}
+
+func (e *Event) String() string {
+	return `Event{Title: "` + e.Title + `"}`
 }
 
 // Person is a person of an Event

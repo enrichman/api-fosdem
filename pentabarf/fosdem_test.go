@@ -1,19 +1,11 @@
 package pentabarf
 
 import (
-	"fmt"
-	"os"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/assert"
 )
-
-func TestParse(t *testing.T) {
-	f, _ := os.Open("pentabarf_test.xml")
-	s, err := Parse(f)
-	fmt.Printf("%+v %+v\n", s, err)
-}
 
 func Test_parseConference(t *testing.T) {
 	location, _ := time.LoadLocation("Europe/Brussels")
