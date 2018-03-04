@@ -17,16 +17,65 @@ const (
 	pathSpeakers = "/schedule/speakers/"
 )
 
+var years = []int{2018}
+
 type Speaker struct {
-	Name        string
-	ProfilePage string
+	Name         string
+	Bio          string
+	ProfilePage  string
+	ProfileImage string
+	Year         int
+	Links        []Link
 }
 
-func GetSpeakers() {
-
+type Link struct {
+	Title string
+	URL   string
 }
 
-func getSpeakers(year int) ([]Speaker, error) {
+type Result struct {
+	Speaker Speaker
+	Error   error
+}
+
+func GetSpeakers() <-chan Result {
+	c := make(chan Result)
+
+	go func() {
+		for _, y := range years {
+			speakers, err := GetSpeakersByYear(y)
+			if err != nil {
+				c <- Result{Error: err}
+				continue
+			}
+
+			for _, s := range speakers {
+				speaker, err := GetSpeaker(s.ProfilePage)
+				if err != nil {
+					c <- Result{Error: err}
+					continue
+				}
+
+				c <- Result{
+					Speaker: Speaker{
+						Name:         s.Name,
+						Bio:          speaker.Bio,
+						ProfilePage:  s.ProfilePage,
+						ProfileImage: speaker.ProfileImage,
+						Year:         y,
+						Links:        speaker.Links,
+					},
+				}
+			}
+		}
+
+		close(c)
+	}()
+
+	return c
+}
+
+func GetSpeakersByYear(year int) ([]Speaker, error) {
 	resp, err := http.Get(fmt.Sprintf("%s/%d%s", baseURL, year, pathSpeakers))
 	if err != nil {
 		return nil, err
@@ -60,7 +109,7 @@ func parseSpeakers(htmlPage io.Reader) ([]Speaker, error) {
 	return speakers, nil
 }
 
-func getSpeaker(profilePage string) (*Speaker, error) {
+func GetSpeaker(profilePage string) (*Speaker, error) {
 	resp, err := http.Get(fmt.Sprintf("%s/%s", baseURL, profilePage))
 	if err != nil {
 		return nil, err
@@ -82,6 +131,8 @@ func parseSpeaker(htmlPage io.Reader) (*Speaker, error) {
 	if !found {
 		return nil, errors.New("main div not found")
 	}
+
+	speaker := &Speaker{}
 
 	// <p> data and print them
 	bioDatas := scrape.FindAll(mainDiv, pMatcher)
@@ -112,7 +163,7 @@ func parseSpeaker(htmlPage io.Reader) (*Speaker, error) {
 		}
 	}
 
-	return nil, nil
+	return speaker, nil
 }
 
 func noTrimJoiner(s []string) string { return strings.Join(s, "") }
