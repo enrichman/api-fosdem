@@ -14,6 +14,8 @@ const yyyyMMddFormat = "2006-01-02"
 type Schedule struct {
 	Conference *Conference `xml:"conference"`
 	Days       []*Day      `xml:"day"`
+
+	personsMap map[string]*Person
 }
 
 // GetAllEvents returns all the events of the schedule
@@ -32,6 +34,36 @@ func (s *Schedule) GetAllRooms() []*Room {
 		rooms = append(rooms, d.Rooms...)
 	}
 	return rooms
+}
+
+func (s *Schedule) GetAllPersons() []*Person {
+	if s.personsMap == nil {
+		s.personsMap = make(map[string]*Person)
+		for _, d := range s.Days {
+			for _, p := range d.GetAllPersons() {
+				s.personsMap[p.Name] = p
+			}
+		}
+	}
+
+	persons := make([]*Person, 0)
+	for _, p := range s.personsMap {
+		persons = append(persons, p)
+	}
+	return persons
+}
+
+func (s *Schedule) GetPersonByName(name string) (*Person, bool) {
+	if s.personsMap == nil {
+		s.personsMap = make(map[string]*Person)
+		for _, d := range s.Days {
+			for _, p := range d.GetAllPersons() {
+				s.personsMap[p.Name] = p
+			}
+		}
+	}
+	p, ok := s.personsMap[name]
+	return p, ok
 }
 
 // Conference contains the main information about the conference
@@ -56,6 +88,8 @@ type Day struct {
 	Date    time.Time
 	DateStr string  `xml:"date,attr"`
 	Rooms   []*Room `xml:"room"`
+
+	personsMap map[string]*Person
 }
 
 func (d *Day) String() string {
@@ -71,14 +105,50 @@ func (d *Day) GetAllEvents() []*Event {
 	return events
 }
 
+func (d *Day) GetAllPersons() []*Person {
+	if d.personsMap == nil {
+		d.personsMap = make(map[string]*Person)
+		for _, r := range d.Rooms {
+			for _, p := range r.GetAllPersons() {
+				d.personsMap[p.Name] = p
+			}
+		}
+	}
+
+	persons := make([]*Person, 0)
+	for _, p := range d.personsMap {
+		persons = append(persons, p)
+	}
+	return persons
+}
+
 // Room contains all the events of the day in the room
 type Room struct {
 	Name   string   `xml:"name,attr"`
 	Events []*Event `xml:"event"`
+
+	personsMap map[string]*Person
 }
 
 func (r *Room) String() string {
 	return `Room{Name: "` + r.Name + `"}`
+}
+
+func (r *Room) GetAllPersons() []*Person {
+	if r.personsMap == nil {
+		r.personsMap = make(map[string]*Person)
+		for _, e := range r.Events {
+			for _, p := range e.Persons {
+				r.personsMap[p.Name] = p
+			}
+		}
+	}
+
+	persons := make([]*Person, 0)
+	for _, p := range r.personsMap {
+		persons = append(persons, p)
+	}
+	return persons
 }
 
 // Event contains all the details about the event

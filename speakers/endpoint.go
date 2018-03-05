@@ -3,13 +3,13 @@ package speakers
 import (
 	"context"
 
-	"github.com/enrichman/api-fosdem/indexer"
+	"github.com/enrichman/api-fosdem/store"
 	"github.com/go-kit/kit/endpoint"
 )
 
 type speakerFinder interface {
-	FindByID(int) (*indexer.Speaker, error)
-	Find(limit, offset int, name string, years []int) ([]indexer.Speaker, int, error)
+	FindByID(int) (*store.Speaker, error)
+	Find(limit, offset int, name string, years []int) ([]store.Speaker, int, error)
 }
 
 func makeSpeakerGetterEndpoint(finder speakerFinder) endpoint.Endpoint {
@@ -26,8 +26,8 @@ type findRequest struct {
 }
 
 type findResponse struct {
-	Count int               `json:"count"`
-	Data  []indexer.Speaker `json:"data"`
+	Count int             `json:"count"`
+	Data  []store.Speaker `json:"data"`
 }
 
 func makeSpeakerFinderEndpoint(finder speakerFinder) endpoint.Endpoint {

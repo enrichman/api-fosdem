@@ -1,9 +1,11 @@
 package web
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"strings"
 
@@ -20,6 +22,8 @@ const (
 var years = []int{2018}
 
 type Speaker struct {
+	ID           int
+	Slug         string
 	Name         string
 	Bio          string
 	ProfilePage  string
@@ -51,7 +55,12 @@ func (g *remoteGetter) GetSpeakersByYear(year int) (io.Reader, error) {
 		return nil, err
 	}
 	defer resp.Body.Close()
-	return resp.Body, nil
+
+	b, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	return bytes.NewReader(b), nil
 }
 
 func (g *remoteGetter) GetSpeaker(profilePage string) (io.Reader, error) {
@@ -60,7 +69,12 @@ func (g *remoteGetter) GetSpeaker(profilePage string) (io.Reader, error) {
 		return nil, err
 	}
 	defer resp.Body.Close()
-	return resp.Body, nil
+
+	b, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	return bytes.NewReader(b), nil
 }
 
 type SpeakerService struct {
@@ -73,44 +87,53 @@ func NewSpeakerService() *SpeakerService {
 
 func (w *SpeakerService) GetSpeakers() <-chan Result {
 	c := make(chan Result)
-
 	go func() {
 		for _, y := range years {
-			reader, err := w.g.GetSpeakersByYear(y)
+			for cY := range w.GetSpeakersByYear(y) {
+				c <- cY
+			}
+		}
+	}()
+	return c
+}
+
+func (w *SpeakerService) GetSpeakersByYear(year int) <-chan Result {
+	c := make(chan Result)
+
+	go func() {
+		reader, err := w.g.GetSpeakersByYear(year)
+		if err != nil {
+			c <- Result{Error: err}
+		}
+
+		speakers, err := parseSpeakers(reader)
+		if err != nil {
+			c <- Result{Error: err}
+		}
+
+		for _, s := range speakers {
+			reader, err := w.g.GetSpeaker(s.ProfilePage)
 			if err != nil {
 				c <- Result{Error: err}
 				continue
 			}
 
-			speakers, err := parseSpeakers(reader)
+			speaker, err := parseSpeaker(reader)
 			if err != nil {
 				c <- Result{Error: err}
 				continue
 			}
 
-			for _, s := range speakers {
-				reader, err := w.g.GetSpeaker(s.ProfilePage)
-				if err != nil {
-					c <- Result{Error: err}
-					continue
-				}
-
-				speaker, err := parseSpeaker(reader)
-				if err != nil {
-					c <- Result{Error: err}
-					continue
-				}
-
-				c <- Result{
-					Speaker: Speaker{
-						Name:         s.Name,
-						Bio:          speaker.Bio,
-						ProfilePage:  s.ProfilePage,
-						ProfileImage: speaker.ProfileImage,
-						Year:         y,
-						Links:        speaker.Links,
-					},
-				}
+			c <- Result{
+				Speaker: Speaker{
+					Slug:         getSlugByLink(s.ProfilePage),
+					Name:         s.Name,
+					Bio:          speaker.Bio,
+					ProfilePage:  s.ProfilePage,
+					ProfileImage: speaker.ProfileImage,
+					Year:         year,
+					Links:        speaker.Links,
+				},
 			}
 		}
 
@@ -199,3 +222,20 @@ func aMatcher(n *html.Node) bool   { return n.DataAtom == atom.A }
 func pMatcher(n *html.Node) bool   { return n.DataAtom == atom.P }
 func imgMatcher(n *html.Node) bool { return n.DataAtom == atom.Img }
 func ulMatcher(n *html.Node) bool  { return n.DataAtom == atom.Ul }
+
+func getSlugByLink(detailLink string) string {
+	if detailLink == "" {
+		return ""
+	}
+	arr := strings.Split(detailLink, "/")
+	cleanedArr := make([]string, 0)
+	for _, s := range arr {
+		if len(s) > 0 {
+			cleanedArr = append(cleanedArr, s)
+		}
+	}
+	if len(cleanedArr) == 0 {
+		return ""
+	}
+	return cleanedArr[len(cleanedArr)-1]
+}

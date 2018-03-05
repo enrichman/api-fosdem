@@ -45,6 +45,7 @@ func TestGetSpeakers(t *testing.T) {
 			},
 			expectedResults: []Result{{
 				Speaker: Speaker{
+					Slug:         "bsdcg_team",
 					Name:         "BSDCG Team",
 					Bio:          "This is a BIO",
 					ProfilePage:  "/2018/schedule/speaker/bsdcg_team/",
@@ -65,7 +66,7 @@ func TestGetSpeakers(t *testing.T) {
 
 	for _, tc := range tt {
 		t.Run(tc.name, func(t *testing.T) {
-			srv := &WebSpeakerService{tc.speakerGetter}
+			srv := &SpeakerService{tc.speakerGetter}
 			resultChan := srv.GetSpeakers()
 
 			results := make([]Result, 0)

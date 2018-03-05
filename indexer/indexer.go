@@ -14,7 +14,7 @@ import (
 
 // Speaker maps the speaker
 type Speaker struct {
-	ID           int    `json:"id" bson:"_id"`
+	ID           int    `json:"id"`
 	Slug         string `json:"slug"`
 	Name         string `json:"name"`
 	ProfileImage string `json:"profile_image,omitempty"`

@@ -7,6 +7,11 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/enrichman/api-fosdem/pentabarf"
+
+	"github.com/enrichman/api-fosdem/store"
+	"github.com/enrichman/api-fosdem/web"
 )
 
 const (
@@ -14,20 +19,27 @@ const (
 )
 
 type speakerSaver interface {
-	Save(s Speaker, year int) error
+	Save(s store.Speaker) error
+}
+
+type speakerGetter interface {
+	GetSpeakers() <-chan web.Result
+	GetSpeakersByYear(int) <-chan web.Result
 }
 
 // RemoteIndexer is an indexer that fetch the FOSDEM XML remotely
 type RemoteIndexer struct {
-	Token        string
-	speakerSaver speakerSaver
+	Token         string
+	speakerSaver  speakerSaver
+	speakerGetter speakerGetter
 }
 
 // NewRemoteIndexer returns a remoteIndexer
 func NewRemoteIndexer(token string, speakerSaver speakerSaver) *RemoteIndexer {
 	return &RemoteIndexer{
-		Token:        token,
-		speakerSaver: speakerSaver,
+		Token:         token,
+		speakerSaver:  speakerSaver,
+		speakerGetter: web.NewSpeakerService(),
 	}
 }
 
@@ -38,13 +50,60 @@ func (fi *RemoteIndexer) GetToken() string {
 
 // Index starts the indexing
 func (fi *RemoteIndexer) Index() error {
-	years := []string{"2013", "2014", "2015", "2016", "2017", "2018"}
-	for _, y := range years {
-		err := fi.IndexYear(y)
+	start := time.Now()
+	fmt.Println(start, "start indexing")
+
+	for year := 2013; year <= 2018; year++ {
+		scheduleRes, err := http.Get(baseURL + "/" + strconv.Itoa(year) + "/schedule/xml")
 		if err != nil {
 			return err
 		}
+
+		schedule, err := pentabarf.Parse(scheduleRes.Body)
+		if err != nil {
+			return err
+		}
+
+		count := 0
+		for r := range fi.speakerGetter.GetSpeakersByYear(year) {
+			if r.Error != nil {
+				fmt.Println("error getting speaker: " + r.Error.Error())
+				continue
+			}
+
+			p, found := schedule.GetPersonByName(r.Speaker.Name)
+			if !found {
+				fmt.Println("person with name not found in schedule: " + r.Speaker.Name)
+				continue
+			}
+
+			s := store.Speaker{
+				ID:           p.ID,
+				Slug:         r.Speaker.Slug,
+				Name:         r.Speaker.Name,
+				ProfileImage: r.Speaker.ProfileImage,
+				ProfilePage:  r.Speaker.ProfilePage,
+				Bio:          r.Speaker.Bio,
+				Year:         r.Speaker.Year,
+			}
+
+			s.Links = make([]store.Link, 0)
+			for _, l := range r.Speaker.Links {
+				s.Links = append(s.Links, store.Link{Title: l.Title, URL: l.URL})
+			}
+
+			err = fi.speakerSaver.Save(s)
+			if err != nil {
+				fmt.Println("error saving speaker: " + err.Error())
+				continue
+			}
+
+			count++
+			fmt.Printf("%d) year [%d] speaker [%s] saved\n", count, year, s.Name)
+		}
 	}
+
+	fmt.Println(time.Since(start), "finished indexing")
 	return nil
 }
 
@@ -76,11 +135,11 @@ func (fi *RemoteIndexer) IndexYear(year string) error {
 			err := ParseSpeakerPage(&s, resp.Body)
 			if err == nil {
 				s.Slug = getSlugByLink(s.ProfilePage)
-				y, _ := strconv.Atoi(year)
-				err := fi.speakerSaver.Save(s, y)
+				_, _ = strconv.Atoi(year)
+				/*err := fi.speakerSaver.Save(s, y)
 				if err != nil {
 					fmt.Println("error upserting:", s.Name)
-				}
+				}*/
 			}
 		}
 	}
