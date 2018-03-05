@@ -63,11 +63,15 @@ func (g *remoteGetter) GetSpeaker(profilePage string) (io.Reader, error) {
 	return resp.Body, nil
 }
 
-type WebSpeakerService struct {
+type SpeakerService struct {
 	g speakerGetter
 }
 
-func (w *WebSpeakerService) GetSpeakers() <-chan Result {
+func NewSpeakerService() *SpeakerService {
+	return &SpeakerService{&remoteGetter{}}
+}
+
+func (w *SpeakerService) GetSpeakers() <-chan Result {
 	c := make(chan Result)
 
 	go func() {

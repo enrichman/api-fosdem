@@ -2,7 +2,6 @@ package web
 
 import (
 	"errors"
-	"fmt"
 	"io"
 	"os"
 	"testing"
@@ -44,7 +43,16 @@ func TestGetSpeakers(t *testing.T) {
 				speakersHTMLPage: "speakers_1.htm",
 				speakerHTMLPage:  "speaker.htm",
 			},
-			expectedResults: []Result{{}},
+			expectedResults: []Result{{
+				Speaker: Speaker{
+					Name:         "BSDCG Team",
+					Bio:          "This is a BIO",
+					ProfilePage:  "/2018/schedule/speaker/bsdcg_team/",
+					ProfileImage: "/2018/schedule/speaker/francesc_campoy/cac4fd830f6d7dd839e1a8cd77ad17c9f5ba9bb39b9c2bc44b05f4568a72a1b6.jpg",
+					Year:         2018,
+					Links:        []Link{Link{Title: "justforfunc", URL: "http://justforfunc.com"}},
+				},
+			}},
 		},
 		{
 			name: "happy path",
@@ -64,21 +72,8 @@ func TestGetSpeakers(t *testing.T) {
 			for r := range resultChan {
 				results = append(results, r)
 			}
-			fmt.Println("Got", len(results), "results")
 
 			assert.Equal(t, tc.expectedResults, results)
 		})
 	}
-}
-
-func TestParseSpeakersPage(t *testing.T) {
-	f, _ := os.Open("fosdem-speakers.htm")
-	speakers, err := parseSpeakers(f)
-	fmt.Println(speakers, err)
-}
-
-func TestParseSpeakerPage(t *testing.T) {
-	f, _ := os.Open("speaker.htm")
-	speakers, err := parseSpeaker(f)
-	fmt.Println(speakers, err)
 }
