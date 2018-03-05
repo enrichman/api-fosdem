@@ -38,19 +38,60 @@ type Result struct {
 	Error   error
 }
 
-func GetSpeakers() <-chan Result {
+type speakerGetter interface {
+	GetSpeakersByYear(year int) (io.Reader, error)
+	GetSpeaker(profilePage string) (io.Reader, error)
+}
+
+type remoteGetter struct{}
+
+func (g *remoteGetter) GetSpeakersByYear(year int) (io.Reader, error) {
+	resp, err := http.Get(fmt.Sprintf("%s/%d%s", baseURL, year, pathSpeakers))
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	return resp.Body, nil
+}
+
+func (g *remoteGetter) GetSpeaker(profilePage string) (io.Reader, error) {
+	resp, err := http.Get(fmt.Sprintf("%s/%s", baseURL, profilePage))
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	return resp.Body, nil
+}
+
+type WebSpeakerService struct {
+	g speakerGetter
+}
+
+func (w *WebSpeakerService) GetSpeakers() <-chan Result {
 	c := make(chan Result)
 
 	go func() {
 		for _, y := range years {
-			speakers, err := GetSpeakersByYear(y)
+			reader, err := w.g.GetSpeakersByYear(y)
+			if err != nil {
+				c <- Result{Error: err}
+				continue
+			}
+
+			speakers, err := parseSpeakers(reader)
 			if err != nil {
 				c <- Result{Error: err}
 				continue
 			}
 
 			for _, s := range speakers {
-				speaker, err := GetSpeaker(s.ProfilePage)
+				reader, err := w.g.GetSpeaker(s.ProfilePage)
+				if err != nil {
+					c <- Result{Error: err}
+					continue
+				}
+
+				speaker, err := parseSpeaker(reader)
 				if err != nil {
 					c <- Result{Error: err}
 					continue
@@ -75,16 +116,6 @@ func GetSpeakers() <-chan Result {
 	return c
 }
 
-func GetSpeakersByYear(year int) ([]Speaker, error) {
-	resp, err := http.Get(fmt.Sprintf("%s/%d%s", baseURL, year, pathSpeakers))
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	return parseSpeakers(resp.Body)
-}
-
 //ParseSpeakersPage returns a map SpeakerName to DetailPageLink of the speakers
 func parseSpeakers(htmlPage io.Reader) ([]Speaker, error) {
 	root, err := html.Parse(htmlPage)
@@ -107,16 +138,6 @@ func parseSpeakers(htmlPage io.Reader) ([]Speaker, error) {
 		})
 	}
 	return speakers, nil
-}
-
-func GetSpeaker(profilePage string) (*Speaker, error) {
-	resp, err := http.Get(fmt.Sprintf("%s/%s", baseURL, profilePage))
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	return parseSpeaker(resp.Body)
 }
 
 func parseSpeaker(htmlPage io.Reader) (*Speaker, error) {
