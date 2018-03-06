@@ -7,13 +7,14 @@ import (
 )
 
 type speakerService interface {
-	FindByID(int) (*Speaker, error)
+	FindByID(int, int) (*Speaker, error)
 	Find(limit, offset int, name string, years []int) ([]Speaker, int, error)
 }
 
 func makeSpeakerGetterEndpoint(finder speakerService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
-		return finder.FindByID(request.(int))
+		req := request.(getSpeakerByIDRequest)
+		return finder.FindByID(req.id, req.year)
 	}
 }
 

@@ -34,13 +34,28 @@ func MakeSpeakersHandler(s speakerService) http.Handler {
 	return r
 }
 
-func decodeSpeakerGetter(_ context.Context, r *http.Request) (request interface{}, err error) {
+type getSpeakerByIDRequest struct {
+	id   int
+	year int
+}
+
+func decodeSpeakerGetter(_ context.Context, r *http.Request) (interface{}, error) {
+	var err error
+	req := getSpeakerByIDRequest{year: 2018}
+
 	vars := mux.Vars(r)
-	id, err := strconv.Atoi(vars["id"])
+	req.id, err = strconv.Atoi(vars["id"])
 	if err != nil {
 		return nil, errors.New("wrong ID")
 	}
-	return id, nil
+
+	if yearStr := r.FormValue("year"); yearStr != "" {
+		req.year, err = strconv.Atoi(yearStr)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return req, nil
 }
 
 func encodeSpeakerGetter(_ context.Context, w http.ResponseWriter, res interface{}) error {

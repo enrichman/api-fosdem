@@ -3,7 +3,7 @@ package speakers
 import "github.com/enrichman/api-fosdem/store"
 
 type speakerFinder interface {
-	FindByID(int) (*store.Speaker, error)
+	FindByID(int, int) (*store.Speaker, error)
 	Find(limit, offset int, name string, years []int) ([]store.Speaker, int, error)
 }
 
@@ -15,8 +15,8 @@ func NewService(speakerFinder speakerFinder) *Service {
 	return &Service{speakerFinder}
 }
 
-func (s *Service) FindByID(id int) (*Speaker, error) {
-	storeSpeaker, err := s.speakerFinder.FindByID(id)
+func (s *Service) FindByID(id, year int) (*Speaker, error) {
+	storeSpeaker, err := s.speakerFinder.FindByID(id, year)
 	if err != nil {
 		return nil, err
 	}

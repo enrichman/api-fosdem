@@ -70,9 +70,9 @@ func (ms *MongoStore) Save(s Speaker) error {
 }
 
 // FindByID find a Speaker from its ID
-func (ms *MongoStore) FindByID(ID int) (*Speaker, error) {
+func (ms *MongoStore) FindByID(ID, year int) (*Speaker, error) {
 	c := ms.db.C(speakerCollection)
-	iter := c.Find(bson.M{"id": ID}).Iter()
+	iter := c.Find(bson.M{"id": ID, "year": year}).Iter()
 
 	var s Speaker
 	if iter.Next(&s) {
