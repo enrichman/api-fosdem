@@ -6,8 +6,10 @@ import (
 	"os"
 
 	"github.com/enrichman/api-fosdem/indexer"
+	"github.com/enrichman/api-fosdem/pentabarf"
 	"github.com/enrichman/api-fosdem/speakers"
 	"github.com/enrichman/api-fosdem/store"
+	"github.com/enrichman/api-fosdem/web"
 )
 
 func main() {
@@ -20,7 +22,12 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	remoteIndexer := indexer.NewRemoteIndexer(token, mongoStore)
+	remoteIndexer := indexer.NewRemoteIndexer(
+		token,
+		&pentabarf.CachedScheduleService{},
+		mongoStore,
+		web.NewSpeakerService(),
+	)
 
 	mux := http.NewServeMux()
 	mux.Handle("/api/v1/reindex", indexer.MakeReindexerHandler(remoteIndexer))

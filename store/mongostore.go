@@ -90,7 +90,7 @@ func (ms *MongoStore) Find(limit, offset int, slug string, years []int) ([]Speak
 		ors = append(ors, bson.M{"slug": bson.RegEx{Pattern: n, Options: "i"}})
 	}
 	if len(years) > 0 {
-		ors = append(ors, bson.M{"years": bson.M{"$in": years}})
+		ors = append(ors, bson.M{"year": bson.M{"$in": years}})
 	}
 
 	query := c.Find(bson.M{"$and": ors})
@@ -100,7 +100,7 @@ func (ms *MongoStore) Find(limit, offset int, slug string, years []int) ([]Speak
 		return nil, 0, err
 	}
 
-	iter := query.Skip(offset).Limit(limit).Sort("_id").Iter()
+	iter := query.Skip(offset).Limit(limit).Sort("id", "-year").Iter()
 	speakersFound := make([]Speaker, 0)
 	var s Speaker
 	for iter.Next(&s) {

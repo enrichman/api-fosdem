@@ -75,6 +75,9 @@ func decodeSpeakerFinder(_ context.Context, r *http.Request) (interface{}, error
 			req.years = append(req.years, yearInt)
 		}
 	}
+	if len(req.years) == 0 {
+		req.years = append(req.years, 2018)
+	}
 
 	req.slug = r.FormValue("slug")
 

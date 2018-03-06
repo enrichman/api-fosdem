@@ -2,13 +2,59 @@ package pentabarf
 
 import (
 	"encoding/xml"
+	"errors"
 	"io"
+	"net/http"
 	"strconv"
 	"strings"
 	"time"
 )
 
-const yyyyMMddFormat = "2006-01-02"
+const (
+	baseURL        = "https://fosdem.org"
+	yyyyMMddFormat = "2006-01-02"
+)
+
+type CachedScheduleService struct {
+	lastModified   string
+	cachedSchedule *Schedule
+}
+
+func (c *CachedScheduleService) GetSchedule(year int) (*Schedule, error) {
+	url := baseURL + "/" + strconv.Itoa(year) + "/schedule/xml"
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	if c.lastModified != "" && c.cachedSchedule != nil {
+		req.Header.Set("If-Modified-Since", c.lastModified)
+	}
+
+	scheduleResp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer scheduleResp.Body.Close()
+
+	if scheduleResp.StatusCode == http.StatusNotModified {
+		return c.cachedSchedule, nil
+	}
+
+	if scheduleResp.StatusCode == http.StatusOK {
+		parsedSchedule, err := Parse(scheduleResp.Body)
+		if err != nil {
+			return nil, err
+		}
+
+		c.lastModified = scheduleResp.Header.Get("Last-Modified")
+		c.cachedSchedule = parsedSchedule
+
+		return c.cachedSchedule, nil
+	}
+
+	return nil, errors.New("error from Fosdem server: " + strconv.Itoa(scheduleResp.StatusCode))
+}
 
 // Schedule contains the info about the Conference and the schedule of the days
 type Schedule struct {
