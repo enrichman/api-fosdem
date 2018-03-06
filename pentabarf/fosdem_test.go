@@ -1,11 +1,18 @@
 package pentabarf
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/assert"
 )
+
+func TestCached(t *testing.T) {
+	srv := &CachedScheduleService{}
+	fmt.Println(srv.GetSchedule(2018))
+	fmt.Println(srv.GetSchedule(2018))
+}
 
 func Test_parseConference(t *testing.T) {
 	location, _ := time.LoadLocation("Europe/Brussels")

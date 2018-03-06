@@ -4,7 +4,6 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/enrichman/api-fosdem/indexer"
 	mgo "gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )
@@ -13,6 +12,24 @@ const (
 	defaultDB         = "api-fosdem"
 	speakerCollection = "speakers"
 )
+
+// Speaker maps the speaker
+type Speaker struct {
+	ID           int
+	Slug         string
+	Name         string
+	ProfileImage string
+	ProfilePage  string
+	Bio          string
+	Year         int
+	Links        []Link
+}
+
+// Link is a detail link owned by a Speaker
+type Link struct {
+	URL   string
+	Title string
+}
 
 // MongoStore can save and retrieve Speakers from MongoDB
 type MongoStore struct {
@@ -32,31 +49,32 @@ func NewMongoStore(uri, db string) (*MongoStore, error) {
 }
 
 // Save a speaker of the passed year
-func (ms *MongoStore) Save(s indexer.Speaker, year int) error {
+func (ms *MongoStore) Save(s Speaker) error {
 	c := ms.db.C(speakerCollection)
 	_, err := c.Upsert(
-		bson.M{"_id": s.ID},
+		bson.M{"id": s.ID, "year": s.Year},
 		bson.M{
 			"$set": bson.M{
+				"id":           s.ID,
 				"slug":         s.Slug,
 				"name":         s.Name,
 				"profileimage": s.ProfileImage,
 				"profilepage":  s.ProfilePage,
-				"links":        s.Links,
 				"bio":          s.Bio,
+				"year":         s.Year,
+				"links":        s.Links,
 			},
-			"$addToSet": bson.M{"years": year},
 		},
 	)
 	return err
 }
 
 // FindByID find a Speaker from its ID
-func (ms *MongoStore) FindByID(ID int) (*indexer.Speaker, error) {
+func (ms *MongoStore) FindByID(ID int) (*Speaker, error) {
 	c := ms.db.C(speakerCollection)
-	iter := c.Find(bson.M{"_id": ID}).Iter()
+	iter := c.Find(bson.M{"id": ID}).Iter()
 
-	var s indexer.Speaker
+	var s Speaker
 	if iter.Next(&s) {
 		return &s, nil
 	}
@@ -64,7 +82,7 @@ func (ms *MongoStore) FindByID(ID int) (*indexer.Speaker, error) {
 }
 
 // Find find a list of Speakers based on the passed params
-func (ms *MongoStore) Find(limit, offset int, slug string, years []int) ([]indexer.Speaker, int, error) {
+func (ms *MongoStore) Find(limit, offset int, slug string, years []int) ([]Speaker, int, error) {
 	c := ms.db.C(speakerCollection)
 
 	ors := make([]bson.M, 0)
@@ -72,7 +90,7 @@ func (ms *MongoStore) Find(limit, offset int, slug string, years []int) ([]index
 		ors = append(ors, bson.M{"slug": bson.RegEx{Pattern: n, Options: "i"}})
 	}
 	if len(years) > 0 {
-		ors = append(ors, bson.M{"years": bson.M{"$in": years}})
+		ors = append(ors, bson.M{"year": bson.M{"$in": years}})
 	}
 
 	query := c.Find(bson.M{"$and": ors})
@@ -82,9 +100,9 @@ func (ms *MongoStore) Find(limit, offset int, slug string, years []int) ([]index
 		return nil, 0, err
 	}
 
-	iter := query.Skip(offset).Limit(limit).Sort("_id").Iter()
-	speakersFound := make([]indexer.Speaker, 0)
-	var s indexer.Speaker
+	iter := query.Skip(offset).Limit(limit).Sort("id", "-year").Iter()
+	speakersFound := make([]Speaker, 0)
+	var s Speaker
 	for iter.Next(&s) {
 		speakersFound = append(speakersFound, s)
 	}
