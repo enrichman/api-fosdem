@@ -13,7 +13,7 @@ import (
 )
 
 // MakeSpeakersHandler setup the handlers on the /api/v1/speakers route
-func MakeSpeakersHandler(s speakerFinder) http.Handler {
+func MakeSpeakersHandler(s speakerService) http.Handler {
 	r := mux.NewRouter().StrictSlash(true)
 
 	speakerGetterHandler := kithttp.NewServer(
